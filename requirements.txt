@@ -17,4 +17,4 @@ flask-jwt-extended
 flask-pymongo
 flask-cors
 python-dotenv
-
+gunicorn
