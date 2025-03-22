@@ -1,0 +1,250 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h2 class="text-center">Librarian Dashboard</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Manage Books</div>
+            <div class="card-body">
+                <button class="btn btn-success" onclick="viewBooks()">View Books</button>
+                <button class="btn btn-primary" onclick="addBook()">Add Book</button>
+                <button class="btn btn-danger" onclick="removeBook()">Remove Book</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Manage Members</div>
+            <div class="card-body">
+                <button class="btn btn-info" onclick="viewMembers()">View Members</button>
+                <button class="btn btn-primary" onclick="addMember()">Add Members</button>
+                <button class="btn btn-danger" onclick="removeMember()">Remove Member</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="output" class="mt-4"></div>
+<script>
+function viewBooks() {
+    fetch('/view_books')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            let output = '<h3>Books List</h3><table class="table table-striped"><thead><tr><th>Title</th><th>Author</th><th>Year</th><th>Book ID</th></tr></thead><tbody>';
+            data.forEach(book => {
+                output += `<tr><td>${book.title}</td><td>${book.author}</td><td>${book.year}</td><td>${book.book_id}</tr>`;
+            });
+            output += '</tbody></table>';
+            document.getElementById('output').innerHTML = output;
+        })
+        .catch(error => {
+            console.error('Error fetching books:', error);
+            document.getElementById('output').innerHTML = 'Error fetching books.';
+        });
+}
+
+function addBook() {
+    document.getElementById('output').innerHTML = `
+        <h3>Add a New Book</h3>
+        <form id="addBookForm">
+            <div class="form-group">
+                <label for="bookTitle">Book Title:</label>
+                <input type="text" class="form-control" id="bookTitle" name="bookTitle" required>
+            </div>
+            <div class="form-group">
+                <label for="bookAuthor">Book Author:</label>
+                <input type="text" class="form-control" id="bookAuthor" name="bookAuthor" required>
+            </div>
+            <div class="form-group">
+                <label for="bookYear">Publication Year:</label>
+                <input type="number" class="form-control" id="bookYear" name="bookYear" required>
+            </div>
+            <div class="form-group">
+                <label for="bookId">Book ID:</label>
+                <input type="text" class="form-control" id="bookId" name="bookId" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Book</button>
+        </form>
+    `;
+
+    document.getElementById('addBookForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const bookTitle = document.getElementById('bookTitle').value;
+        const bookAuthor = document.getElementById('bookAuthor').value;
+        const bookYear = document.getElementById('bookYear').value;
+        const bookId = document.getElementById('bookId').value;
+
+        fetch('/add_book', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+                title: bookTitle, 
+                author: bookAuthor, 
+                year: bookYear,
+                book_id: bookId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('output').innerHTML = '<p class="text-success">Book added successfully!</p>';
+            } else {
+                document.getElementById('output').innerHTML = `<p class="text-danger">${data.error}</p>`;
+            }
+        })
+        .catch(error => {
+            console.error('Error adding book:', error);
+            document.getElementById('output').innerHTML = '<p class="text-danger">Error adding book.</p>';
+        });
+    });
+}
+
+    function removeBook() {
+    document.getElementById('output').innerHTML = `
+        <h3>Remove a Book</h3>
+        <form id="removeBookForm">
+            <div class="form-group">
+                <label for="bookId">Book ID:</label>
+                <input type="text" class="form-control" id="bookId" name="bookId" required>
+            </div>
+            <button type="submit" class="btn btn-danger">Remove Book</button>
+        </form>
+    `;
+
+    document.getElementById('removeBookForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const bookId = document.getElementById('bookId').value;
+
+        fetch('/remove_book', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ book_id: bookId })  // Send book ID to remove
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('output').innerHTML = '<p class="text-success">Book removed successfully!</p>';
+            } else {
+                document.getElementById('output').innerHTML = `<p class="text-danger">${data.error}</p>`;
+            }
+        })
+        .catch(error => {
+            console.error('Error removing book:', error);
+            document.getElementById('output').innerHTML = '<p class="text-danger">Error removing book.</p>';
+        });
+    });
+}
+
+function viewMembers() {
+    fetch('/view_members')
+        .then(response => response.json())
+        .then(data => {
+            let output = '<h3>Members List</h3><table class="table table-striped"><thead><tr><th>Email</th><th>Role</th></tr></thead><tbody>';
+            data.forEach(member => {
+                output += `<tr><td>${member.email}</td><td>${member.role}</td></tr>`;
+            });
+            output += '</tbody></table>';
+            document.getElementById('output').innerHTML = output;
+        })
+        .catch(error => {
+            console.error('Error fetching members:', error);
+            document.getElementById('output').innerHTML = '<p class="text-danger">Error fetching members.</p>';
+        });
+}
+
+function removeMember() {
+    document.getElementById('output').innerHTML = `
+        <h3>Remove a Member</h3>
+        <form id="removeMemberForm">
+            <div class="form-group">
+                <label for="memberEmail">Member Email:</label>
+                <input type="email" class="form-control" id="memberEmail" name="memberEmail" required>
+            </div>
+            <button type="submit" class="btn btn-danger">Remove Member</button>
+        </form>
+    `;
+
+    document.getElementById('removeMemberForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const memberEmail = document.getElementById('memberEmail').value;
+
+        fetch('/remove_member', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: memberEmail })  // Send member email to remove
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('output').innerHTML = '<p class="text-success">Member removed successfully!</p>';
+            } else {
+                document.getElementById('output').innerHTML = `<p class="text-danger">${data.error}</p>`;
+            }
+        })
+        .catch(error => {
+            console.error('Error removing member:', error);
+            document.getElementById('output').innerHTML = '<p class="text-danger">Error removing member.</p>';
+        });
+    });
+}
+
+function addMember() {
+    document.getElementById('output').innerHTML = `
+        <h3>Add a New Member</h3>
+        <form id="addMemberForm">
+            <div class="form-group">
+                <label for="fullName">Full Name:</label>
+                <input type="text" class="form-control" id="fullName" name="fullName" required>
+            </div>
+            <div class="form-group">
+                <label for="memberEmail">Email:</label>
+                <input type="email" class="form-control" id="memberEmail" name="memberEmail" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <button type="submit" class="btn btn-success">Add Member</button>
+        </form>
+    `;
+
+    document.getElementById('addMemberForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const fullName = document.getElementById('fullName').value;
+        const memberEmail = document.getElementById('memberEmail').value;
+        const password = document.getElementById('password').value;
+
+        fetch('/add_member', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ full_name: fullName, email: memberEmail, password: password })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('output').innerHTML = '<p class="text-success">Member added successfully!</p>';
+            } else {
+                document.getElementById('output').innerHTML = `<p class="text-danger">${data.error}</p>`;
+            }
+        })
+        .catch(error => {
+            console.error('Error adding member:', error);
+            document.getElementById('output').innerHTML = '<p class="text-danger">Error adding member.</p>';
+        });
+    });
+}
+
+
+</script>
+
+{% endblock %}

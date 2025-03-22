@@ -1,0 +1,160 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h2 class="text-center">Member Dashboard</h2>
+
+<div class="card">
+    <div class="card-header">Available Books</div>
+    <div class="card-body">
+        <button class="btn btn-info" onclick="viewBooks()">View Books</button>
+        <button class="btn btn-primary" onclick="borrowBook()">Borrow Book</button>
+        <button class="btn btn-warning" onclick="returnBook()">Return Book</button>
+        <button class="btn btn-danger" onclick="deleteAccount()">Delete Account</button>
+    </div>
+</div>
+
+<div id="output" class="mt-4"></div>
+
+<script>
+function viewBooks() {
+    fetch('/view_books')
+        .then(response => response.json())
+        .then(data => {
+            let output = '<h3>Available Books</h3><table class="table table-striped"><thead><tr><th>Title</th><th>Author</th><th>Book ID</th><th>Status</th></tr></thead><tbody>';
+            data.forEach(book => {
+                output += `<tr><td>${book.title}</td><td>${book.author}</td><td>${book.book_id}</td><td>${book.status}</td></tr>`;
+            });
+            output += '</tbody></table>';
+            document.getElementById('output').innerHTML = output;
+        })
+        .catch(error => {
+            console.error('Error fetching books:', error);
+            document.getElementById('output').innerHTML = '<p class="text-danger">Error fetching books.</p>';
+        });
+}
+
+
+function borrowBook() {
+    document.getElementById('output').innerHTML = `
+        <h3>Borrow a Book</h3>
+        <form id="borrowBookForm">
+            <div class="form-group">
+                <label for="bookId">Book ID:</label>
+                <input type="text" class="form-control" id="bookId" name="bookId" required>
+            </div>
+            <div class="form-group">
+                <label for="memberEmail">Your Email:</label>
+                <input type="email" class="form-control" id="memberEmail" name="memberEmail" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Borrow Book</button>
+        </form>
+    `;
+
+    document.getElementById('borrowBookForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const bookId = document.getElementById('bookId').value;
+        const memberEmail = document.getElementById('memberEmail').value;
+
+        fetch('/borrow_book', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ book_id: bookId, email: memberEmail })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('output').innerHTML = `<p class="text-success">${data.message}</p>`;
+            } else {
+                document.getElementById('output').innerHTML = `<p class="text-danger">${data.error}</p>`;
+            }
+        })
+        .catch(error => {
+            console.error('Error borrowing book:', error);
+            document.getElementById('output').innerHTML = '<p class="text-danger">Error borrowing book.</p>';
+        });
+    });
+}
+
+
+function returnBook() {
+    document.getElementById('output').innerHTML = `
+        <h3>Return a Book</h3>
+        <form id="returnBookForm">
+            <div class="form-group">
+                <label for="bookId">Book ID:</label>
+                <input type="text" class="form-control" id="bookId" name="bookId" required>
+            </div>
+            <div class="form-group">
+                <label for="memberEmail">Your Email:</label>
+                <input type="email" class="form-control" id="memberEmail" name="memberEmail" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Return Book</button>
+        </form>
+    `;
+
+    document.getElementById('returnBookForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const bookId = document.getElementById('bookId').value;
+        const memberEmail = document.getElementById('memberEmail').value;
+
+        fetch('/return_book', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ book_id: bookId, email: memberEmail })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('output').innerHTML = `<p class="text-success">${data.message}</p>`;
+            } else {
+                document.getElementById('output').innerHTML = `<p class="text-danger">${data.error}</p>`;
+            }
+        })
+        .catch(error => {
+            console.error('Error returning book:', error);
+            document.getElementById('output').innerHTML = '<p class="text-danger">Error returning book.</p>';
+        });
+    });
+}
+
+function deleteAccount() {
+    document.getElementById('output').innerHTML = `
+        <h3>Delete Your Account</h3>
+        <form id="deleteAccountForm">
+            <div class="form-group">
+                <label for="memberEmail">Your Email:</label>
+                <input type="email" class="form-control" id="memberEmail" name="memberEmail" required>
+            </div>
+            <button type="submit" class="btn btn-danger">Delete Account</button>
+        </form>
+    `;
+
+    document.getElementById('deleteAccountForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const memberEmail = document.getElementById('memberEmail').value;
+
+        fetch('/delete_account', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: memberEmail })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('output').innerHTML = `<p class="text-success">${data.message}</p>`;
+                setTimeout(() => {
+                    window.location.href = "/register";  // Redirect after account deletion
+                }, 2000);
+            } else {
+                document.getElementById('output').innerHTML = `<p class="text-danger">${data.error}</p>`;
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting account:', error);
+            document.getElementById('output').innerHTML = '<p class="text-danger">Error deleting account.</p>';
+        });
+    });
+}
+
+</script>
+{% endblock %}

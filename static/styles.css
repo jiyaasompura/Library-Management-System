@@ -1,0 +1,33 @@
+/* Header Styling */
+header h1 {
+  text-align: center;
+  font: 3rem times;
+  padding-top: 150px;
+}
+
+/* Form Title Styling */
+form h1 {
+  text-align: center;
+  font: 3rem times;
+}
+
+/* Form Container Styling */
+.form-signin {
+  max-width: 330px;
+  padding: 1rem;
+}
+
+/* General Form Styling */
+form {
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: auto;
+}
+
+/* Input Field Styling */
+.form-floating {
+  width: 100%;
+  margin: auto;
+  padding: 10px;
+}
