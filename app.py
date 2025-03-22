@@ -1,5 +1,4 @@
 # Import necessary libraries and modules
-
 from flask import Flask, render_template, request, url_for, redirect, jsonify, make_response
 import jwt
 from flask_pymongo import PyMongo
