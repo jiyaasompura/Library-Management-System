@@ -23,6 +23,19 @@ jwt = JWTManager(app)
 
 # ----------------------------- Authentication Routes -----------------------------
 
+@app.route('/test_db', methods=['GET'])
+def test_db():
+    """Test MongoDB connection"""
+    try:
+        if mongo.db is None:
+            return jsonify({"error": "MongoDB connection failed"}), 500
+
+        collections = mongo.db.list_collection_names()
+        return jsonify({"message": "MongoDB connected", "collections": collections})
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route("/", methods=["GET", "POST"])
 @app.route("/login", methods=["GET", "POST"])
 def login():
