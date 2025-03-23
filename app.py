@@ -75,7 +75,7 @@ def register():
     hashed_password = generate_password_hash(password)
     
     user_data = {"email": email, "password": hashed_password, "role": role}
-    mongo.db.users.insert_one(user_data)
+    mongo.db.users.with_options(write_concern=None).insert_one(user_data)
     return redirect(url_for("login"))
 
 @app.route("/logout", methods=["GET"])
